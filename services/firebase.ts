@@ -2,9 +2,8 @@ import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-// Auth (React Native Persistence)
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth/react-native";
+import { initializeAuth, getAuth } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -15,13 +14,31 @@ const firebaseConfig = {
     appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
-// App nur 1x initialisieren (wichtig bei Fast Refresh)
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 
-// Auth mit Persistence (damit Login “bleibt”)
-export const auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
-});
+// Dynamisch versuchen, das React-Native-Persistence-Modul zu laden
+let getReactNativePersistenceFn: any = undefined;
+try {
+    // @ts-ignore - falls das Modul in der installierten Firebase-Version fehlt
+    getReactNativePersistenceFn = require("firebase/auth/react-native").getReactNativePersistence;
+} catch {
+    getReactNativePersistenceFn = undefined;
+}
+
+// Auth: initialisieren mit Persistence falls verfügbar, sonst Fallback auf den getAuth
+export const auth = (() => {
+    if (getReactNativePersistenceFn) {
+        try {
+            return initializeAuth(app, {
+                persistence: getReactNativePersistenceFn(AsyncStorage),
+            });
+        } catch {
+            return getAuth(app);
+        }
+    } else {
+        return getAuth(app);
+    }
+})();
 
 export const db = getFirestore(app);
 export const storage = getStorage(app);
