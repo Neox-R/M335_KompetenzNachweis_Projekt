@@ -3,6 +3,11 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
+      "@/*": ["./*"], // This maps "@/" to the project root
+      "@/components/*": ["./components/*"], // This maps "@/components/" to the actual components directory
+      "@/hooks/*": ["./hooks/*"],
+      "@/constants/*": ["./constants/*"],
+      // ... other aliases
       "@firebase/auth": ["./node_modules/firebase/node_modules/@firebase/auth/dist/index.rn.d.ts"],
     }
   },
