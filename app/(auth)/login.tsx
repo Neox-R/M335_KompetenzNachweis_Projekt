@@ -1,48 +1,58 @@
 import { useState } from "react";
-import { Alert, Button, Text, TextInput, View } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { View, Text, TextInput, Pressable, StyleSheet, Alert } from "react-native";
+import { Link } from "expo-router";
 import { login } from "@/services/auth";
 
 export default function LoginScreen() {
-    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
 
-    async function handleLogin() {
+    async function onLogin() {
         try {
             await login(email.trim(), password);
-            router.replace("/(tabs)");
+            // kein router.replace nötig – RootLayout schaltet automatisch auf (tabs)
         } catch (e: any) {
             Alert.alert("Login fehlgeschlagen", e?.message ?? "Unbekannter Fehler");
         }
     }
+
     return (
-        <View style={{ flex: 1, padding: 20, justifyContent: "center", gap: 12 }}>
-            <Text style={{ fontSize: 24, fontWeight: "700" }}>StoryTellers – Login</Text>
+        <View style={styles.container}>
+            <Text style={styles.title}>Login</Text>
 
             <TextInput
+                value={email}
+                onChangeText={setEmail}
                 placeholder="E-Mail"
                 autoCapitalize="none"
                 keyboardType="email-address"
-                value={email}
-                onChangeText={setEmail}
-                style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+                style={styles.input}
             />
 
             <TextInput
-                placeholder="Passwort"
-                secureTextEntry
                 value={password}
                 onChangeText={setPassword}
-                style={{ borderWidth: 1, padding: 12, borderRadius: 8 }}
+                placeholder="Passwort"
+                secureTextEntry
+                style={styles.input}
             />
 
-            <Button title="Login" onPress={handleLogin} />
+            <Pressable style={styles.btn} onPress={onLogin}>
+                <Text style={styles.btnText}>Einloggen</Text>
+            </Pressable>
 
-            <Text>
+            <Text style={styles.linkText}>
                 Noch kein Konto? <Link href="/(auth)/register">Registrieren</Link>
             </Text>
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: { flex: 1, padding: 20, justifyContent: "center", gap: 12 },
+    title: { fontSize: 26, fontWeight: "700", marginBottom: 10 },
+    input: { borderWidth: 1, borderColor: "#999", borderRadius: 10, padding: 12 },
+    btn: { padding: 14, borderRadius: 12, alignItems: "center", borderWidth: 1 },
+    btnText: { fontWeight: "700" },
+    linkText: { marginTop: 10 },
+});

@@ -1,5 +1,6 @@
 {
   "expo": {
+    "pligins": ["expo-notifications"],
     "name": "StoryTellers",
     "slug": "StoryTellers",
     "version": "1.0.0",
